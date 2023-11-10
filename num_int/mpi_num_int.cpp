@@ -60,13 +60,16 @@ int main (int argc, char* argv[]) {
 
   // Divide the task among processes
   int local_n = n / world_size;
-  double local_a = a + world_rank * local_n;
-  double local_b = local_a + local_n;
+  double local_a = a + world_rank * local_n * temp;
+  double local_b = local_a + local_n * temp;
+  double local_temp = (local_b - local_a) / local_n;
 
   for (int i = 0; i < local_n; i++) {
-    double x = local_a + (i + 0.5) * temp;
+    double x = local_a + (i + 0.5) * local_temp;
     local_sum += f(x, intensity);
   }
+
+  local_sum *= local_temp;
 
   double global_sum = 0.0;
   MPI_Reduce(&local_sum, &global_sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
@@ -75,7 +78,7 @@ int main (int argc, char* argv[]) {
     end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::cerr << elapsed_seconds.count() << std::endl;
-    std::cout << global_sum * temp << std::endl;
+    std::cout << global_sum << std::endl;
   }
 
   MPI_Finalize();  
