@@ -60,13 +60,13 @@ int main (int argc, char* argv[]) {
 
   // Divide the task among processes
   int local_n = n / world_size;
-  int start = world_rank * local_n;
-  int end = start + local_n;
+  int local_start = world_rank * local_n;
+  int local_end = local_start + local_n;
   if (world_rank == world_size - 1) {
-    end = n;
+    local_end = n;
   }
 
-  for(int i = start; i < end; i++) {
+  for(int i = local_start; i < local_end; i++) {
     float x = a + (i + 0.5) * temp;
     local_sum += f(x, intensity);
   }
