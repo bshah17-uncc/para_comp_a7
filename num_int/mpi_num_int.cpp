@@ -43,26 +43,26 @@ int main (int argc, char* argv[]) {
 
   MPI_Init(&argc, &argv);
 
-  int world_size;
-  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+  int size;
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  int world_rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   double temp = (b - a) / n;
   double local_sum = 0.0;
 
   // Timing the execution
   std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
-  if (world_rank == 0) {
+  if (rank == 0) {
       start = std::chrono::high_resolution_clock::now();
   }
 
   // Divide the task among processes
-  int local_n = n / world_size;
-  int local_start = world_rank * local_n;
+  int local_n = n / size;
+  int local_start = rank * local_n;
   int local_end = local_start + local_n;
-  if (world_rank == world_size - 1) {
+  if (rank == size - 1) {
     local_end = n;
   }
 
@@ -74,7 +74,7 @@ int main (int argc, char* argv[]) {
   double global_sum = 0.0;
   MPI_Reduce(&local_sum, &global_sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-  if (world_rank == 0) {
+  if (rank == 0) {
     end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::cerr << elapsed_seconds.count() << std::endl;
